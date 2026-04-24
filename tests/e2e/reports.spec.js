@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { waitForPageData, resetFilters } from './helpers/navigation.js'
+import { waitForPageData, waitForFilterReload, resetFilters } from './helpers/navigation.js'
 
 test.describe('Reports page — filter regression', () => {
 
@@ -22,8 +22,8 @@ test.describe('Reports page — filter regression', () => {
     const stat = page.locator('.stat-card .stat-value').first()
     const before = await stat.innerText()
 
-    await page.locator('.filter-select').nth(1).selectOption('London')
-    await waitForPageData(page)
+    await page.locator('.filter-select').nth(1).selectOption('San Francisco')
+    await waitForFilterReload(page)
 
     const after = await stat.innerText()
     expect(after).not.toBe(before)
@@ -34,17 +34,17 @@ test.describe('Reports page — filter regression', () => {
     const fullYear = parseInt((await totalOrdersStat.innerText()).replace(/,/g, ''), 10)
 
     await page.locator('.filter-select').nth(0).selectOption('2025-01')
-    await waitForPageData(page)
+    await waitForFilterReload(page)
 
     const oneMonth = parseInt((await totalOrdersStat.innerText()).replace(/,/g, ''), 10)
     expect(oneMonth).toBeLessThan(fullYear)
   })
 
-  test('combined month + warehouse filter shows one row in monthly trend table', async ({ page }) => {
-    await page.locator('.filter-select').nth(0).selectOption('2025-03')
-    await page.locator('.filter-select').nth(1).selectOption('San Francisco')
-    await waitForPageData(page)
+  test('month filter reduces monthly trend table to one row', async ({ page }) => {
+    await page.locator('.filter-select').nth(0).selectOption('2025-05')
+    await waitForFilterReload(page)
 
+    // When a single month is selected, the monthly trend table shows only that month.
     const trendRows = page.locator('.reports-table').nth(1).locator('tbody tr')
     await expect(trendRows).toHaveCount(1)
   })

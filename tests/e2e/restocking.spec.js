@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { waitForPageData } from './helpers/navigation.js'
+import { waitForPageData, waitForFilterReload } from './helpers/navigation.js'
 
 test.describe('Restocking page — budget input', () => {
 
@@ -20,6 +20,7 @@ test.describe('Restocking page — budget input', () => {
 
     await page.locator('#budget-input').fill('1')
     await page.locator('#budget-input').press('Tab')
+    await page.waitForTimeout(150)
 
     const after = parseInt(await withinBudgetStat.innerText(), 10)
     expect(after).toBeLessThan(before)
@@ -31,10 +32,12 @@ test.describe('Restocking page — budget input', () => {
 
     await input.fill('1')
     await input.press('Tab')
+    await page.waitForTimeout(150)
     const atLowBudget = parseInt(await withinBudgetStat.innerText(), 10)
 
     await input.fill('99999999')
     await input.press('Tab')
+    await page.waitForTimeout(150)
     const atHighBudget = parseInt(await withinBudgetStat.innerText(), 10)
 
     expect(atHighBudget).toBeGreaterThanOrEqual(atLowBudget)
