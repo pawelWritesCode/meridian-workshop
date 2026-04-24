@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Current-State Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #1e293b; padding: 2rem; }
+
+  .page { max-width: 1100px; margin: 0 auto; }
+
+  h1 { font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 0.9rem; color: #64748b; margin-bottom: 2rem; }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .layer {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+  }
+
+  .layer-header {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .layer-header.frontend { background: #eff6ff; color: #1d4ed8; border-bottom: 2px solid #bfdbfe; }
+  .layer-header.backend  { background: #f0fdf4; color: #15803d; border-bottom: 2px solid #bbf7d0; }
+  .layer-header.data     { background: #fefce8; color: #a16207; border-bottom: 2px solid #fde68a; }
+
+  .layer-body { padding: 1rem 1.25rem; }
+
+  .stack-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+    margin: 0.875rem 0 0.4rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  .item-list { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; }
+  .item-list li {
+    font-size: 0.82rem;
+    color: #334155;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .item-list li:hover { background: #f8fafc; }
+
+  .pill {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .pill.get    { background: #dcfce7; color: #166534; }
+  .pill.post   { background: #fef9c3; color: #854d0e; }
+  .pill.patch  { background: #dbeafe; color: #1e40af; }
+  .pill.delete { background: #fee2e2; color: #991b1b; }
+  .pill.view   { background: #ede9fe; color: #6d28d9; }
+  .pill.comp   { background: #f0fdf4; color: #15803d; }
+  .pill.file   { background: #fefce8; color: #92400e; }
+
+  /* Arrow connectors */
+  .connectors {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 3rem;
+  }
+  .arrow-block { text-align: center; }
+  .arrow { font-size: 1.5rem; color: #94a3b8; line-height: 1; }
+  .arrow-label { font-size: 0.7rem; color: #64748b; white-space: nowrap; margin-top: 0.2rem; }
+
+  /* Flow diagram row */
+  .flow-row {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr 48px 1fr;
+    gap: 0;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+
+  /* Endpoints full-width section */
+  .endpoints-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .endpoints-section .layer-header { background: #f8fafc; color: #334155; border-bottom: 2px solid #e2e8f0; }
+
+  .endpoints-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0;
+    padding: 1rem 1.25rem;
+  }
+  .endpoint-group { padding: 0 0.75rem 0.75rem 0; }
+  .endpoint-group .section-label { margin-top: 0; }
+
+  footer { margin-top: 1.5rem; font-size: 0.78rem; color: #94a3b8; text-align: right; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Meridian Components — Current-State Architecture</h1>
+  <p class="subtitle">Inventory Dashboard · Delivered by previous vendor · Reviewed as part of modernisation engagement</p>
+
+  <!-- Three-layer diagram -->
+  <div class="flow-row">
+
+    <!-- Frontend -->
+    <div class="layer">
+      <div class="layer-header frontend">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Frontend · :3000
+      </div>
+      <div class="layer-body">
+        <div class="stack-badge">Vue 3 · Vue Router · Axios · Vite</div>
+
+        <div class="section-label">Views</div>
+        <ul class="item-list">
+          <li><span class="pill view">view</span> Dashboard</li>
+          <li><span class="pill view">view</span> Inventory</li>
+          <li><span class="pill view">view</span> Orders</li>
+          <li><span class="pill view">view</span> Spending</li>
+          <li><span class="pill view">view</span> Demand</li>
+          <li><span class="pill view">view</span> Reports</li>
+        </ul>
+
+        <div class="section-label">Shared Logic</div>
+        <ul class="item-list">
+          <li><span class="pill comp">use</span> useFilters</li>
+          <li><span class="pill comp">use</span> useI18n</li>
+          <li><span class="pill comp">use</span> useAuth</li>
+        </ul>
+
+        <div class="section-label">Key Components</div>
+        <ul class="item-list">
+          <li><span class="pill comp">cmp</span> FilterBar</li>
+          <li><span class="pill comp">cmp</span> LanguageSwitcher</li>
+          <li><span class="pill comp">cmp</span> TasksModal</li>
+          <li><span class="pill comp">cmp</span> PurchaseOrderModal</li>
+          <li><span class="pill comp">cmp</span> BacklogDetailModal</li>
+          <li><span class="pill comp">cmp</span> + 4 more modals</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="connectors">
+      <div class="arrow-block">
+        <div class="arrow">⇄</div>
+        <div class="arrow-label">HTTP/JSON<br>axios</div>
+      </div>
+    </div>
+
+    <!-- Backend -->
+    <div class="layer">
+      <div class="layer-header backend">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Backend · :8001
+      </div>
+      <div class="layer-body">
+        <div class="stack-badge">Python · FastAPI · Uvicorn · Pydantic</div>
+
+        <div class="section-label">API Domains</div>
+        <ul class="item-list">
+          <li><span class="pill get">GET</span> /api/inventory</li>
+          <li><span class="pill get">GET</span> /api/orders</li>
+          <li><span class="pill get">GET</span> /api/backlog</li>
+          <li><span class="pill get">GET</span> /api/demand</li>
+          <li><span class="pill get">GET</span> /api/spending/*</li>
+          <li><span class="pill get">GET</span> /api/reports/*</li>
+          <li><span class="pill get">GET</span> /api/dashboard/summary</li>
+          <li><span class="pill get">GET</span> /api/tasks</li>
+          <li><span class="pill post">POST</span> /api/tasks</li>
+          <li><span class="pill patch">PATCH</span> /api/tasks/:id</li>
+          <li><span class="pill delete">DEL</span> /api/tasks/:id</li>
+          <li><span class="pill post">POST</span> /api/purchase-orders</li>
+          <li><span class="pill get">GET</span> /api/purchase-orders/:id</li>
+        </ul>
+
+        <div class="section-label">Cross-cutting</div>
+        <ul class="item-list">
+          <li><span class="pill comp">cfg</span> CORS — all origins</li>
+          <li><span class="pill comp">cfg</span> No auth (demo)</li>
+          <li><span class="pill comp">cfg</span> In-memory state</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="connectors">
+      <div class="arrow-block">
+        <div class="arrow">⇄</div>
+        <div class="arrow-label">Python<br>dict reads</div>
+      </div>
+    </div>
+
+    <!-- Data layer -->
+    <div class="layer">
+      <div class="layer-header data">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+        Data Layer
+      </div>
+      <div class="layer-body">
+        <div class="stack-badge">JSON files · In-memory · No persistence</div>
+
+        <div class="section-label">Data Files</div>
+        <ul class="item-list">
+          <li><span class="pill file">json</span> inventory.json</li>
+          <li><span class="pill file">json</span> orders.json</li>
+          <li><span class="pill file">json</span> backlog_items.json</li>
+          <li><span class="pill file">json</span> demand_forecasts.json</li>
+          <li><span class="pill file">json</span> spending.json</li>
+          <li><span class="pill file">json</span> transactions.json</li>
+          <li><span class="pill file">json</span> purchase_orders.json</li>
+          <li><span class="pill file">json</span> tasks.json</li>
+        </ul>
+
+        <div class="section-label">Notes</div>
+        <ul class="item-list">
+          <li style="color:#92400e; font-size:0.78rem;">Data loaded once at startup — writes do not persist across restarts</li>
+          <li style="color:#92400e; font-size:0.78rem;">No database, no migrations</li>
+          <li style="color:#166534; font-size:0.78rem;">Simple to replace with SQLite or Postgres</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Observations -->
+  <div class="endpoints-section">
+    <div class="layer-header" style="background:#fef2f2; color:#991b1b; border-bottom:2px solid #fecaca;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Findings &amp; Gaps (from vendor handoff review)
+    </div>
+    <div style="padding:1rem 1.25rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div>
+        <div class="section-label">Known Issues</div>
+        <ul class="item-list">
+          <li style="font-size:0.82rem;">⚠ Reports page — filter behaviour incorrect (R1)</li>
+          <li style="font-size:0.82rem;">⚠ i18n gaps — some keys missing in Japanese locale</li>
+          <li style="font-size:0.82rem;">⚠ Console noise — unhandled promise rejections in Reports</li>
+          <li style="font-size:0.82rem;">⚠ API pattern inconsistencies in Reports view</li>
+        </ul>
+      </div>
+      <div>
+        <div class="section-label">Missing Features (Statement of Work)</div>
+        <ul class="item-list">
+          <li style="font-size:0.82rem;">✦ Restocking Recommendations view (R2)</li>
+          <li style="font-size:0.82rem;">✦ Automated browser test coverage (R3)</li>
+          <li style="font-size:0.82rem;">✦ UI refresh to current standards (D1)</li>
+          <li style="font-size:0.82rem;">✦ Full i18n coverage (D2)</li>
+          <li style="font-size:0.82rem;">✦ Dark mode (D3)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>Meridian Components · Architecture Review · Engagement kickoff — April 2026</footer>
+</div>
+</body>
+</html>

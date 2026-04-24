@@ -1,0 +1,23 @@
+[
+  {
+    "id": "task-1",
+    "title": "Review Q4 inventory levels",
+    "priority": "high",
+    "dueDate": "2025-10-08",
+    "status": "pending"
+  },
+  {
+    "id": "task-2",
+    "title": "Approve Chicago warehouse orders",
+    "priority": "medium",
+    "dueDate": "2025-10-06",
+    "status": "pending"
+  },
+  {
+    "id": "task-3",
+    "title": "Update reorder points for circuit boards",
+    "priority": "medium",
+    "dueDate": "2025-10-10",
+    "status": "completed"
+  }
+]

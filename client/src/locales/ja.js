@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '在庫補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -185,6 +187,33 @@ export default {
       change: '変化',
       trend: 'トレンド',
       period: '期間'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期業績指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期業績',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月次収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高業績四半期'
     }
   },
 
@@ -378,5 +407,39 @@ export default {
     'Premier Industries': 'プレミア工業',
     'Stellar Components Ltd': 'ステラコンポーネンツ',
     'Dynamic Systems Ltd': 'ダイナミックシステムズ'
+  },
+
+  // Restocking
+  restocking: {
+    title: '在庫補充推奨',
+    description: '在庫レベルと需要予測に基づく優先発注推奨リスト',
+    budgetCeiling: '予算上限（$）',
+    noRecommendations: 'すべての品目の在庫は十分です。',
+    stats: {
+      itemsNeedingRestock: '補充が必要な品目',
+      itemsWithinBudget: '予算内の品目',
+      totalEstimatedSpend: '推定合計支出'
+    },
+    table: {
+      sku: 'SKU',
+      name: '品目名',
+      category: 'カテゴリ',
+      warehouse: '倉庫',
+      onHand: '在庫数',
+      reorderPoint: '発注点',
+      forecastedDemand: '予測需要（30日）',
+      trend: 'トレンド',
+      recommendedQty: '推奨数量',
+      estimatedCost: '推定費用',
+      budgetStatus: '予算'
+    },
+    status: {
+      withinBudget: '予算内',
+      exceedsBudget: '予算超過'
+    },
+    urgency: {
+      critical: '緊急',
+      watch: '注意'
+    }
   }
 }

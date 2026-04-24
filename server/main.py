@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, tasks
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -228,12 +228,20 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if month and month != 'all':
+        filtered = filter_by_month(filtered, month)
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -253,7 +261,8 @@ def get_quarterly_reports():
                 'total_orders': 0,
                 'total_revenue': 0,
                 'delivered_orders': 0,
-                'avg_order_value': 0
+                'avg_order_value': 0,
+                'fulfillment_rate': 0
             }
 
         quarters[quarter]['total_orders'] += 1
@@ -274,11 +283,20 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if month and month != 'all':
+        filtered = filter_by_month(filtered, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +321,51 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+class Task(BaseModel):
+    id: str
+    title: str
+    priority: str
+    dueDate: str
+    status: str
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: str
+    dueDate: str
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    return tasks
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(request: CreateTaskRequest):
+    import uuid
+    new_task = {
+        "id": f"task-{uuid.uuid4().hex[:8]}",
+        "title": request.title,
+        "priority": request.priority,
+        "dueDate": request.dueDate,
+        "status": "pending"
+    }
+    tasks.insert(0, new_task)
+    return new_task
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    index = next((i for i, t in enumerate(tasks) if t["id"] == task_id), None)
+    if index is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    tasks.pop(index)
+    return {"message": "Task deleted"}
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    task = next((t for t in tasks if t["id"] == task_id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task["status"] = "completed" if task["status"] == "pending" else "pending"
+    return task
 
 if __name__ == "__main__":
     import uvicorn
